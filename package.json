@@ -1,0 +1,22 @@
+{
+  "name": "e2e-automation",
+  "version": "1.0.0",
+  "description": "E2E test automation for real-time collaboration web service",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:auth": "npx playwright test --project=auth-tests",
+    "test:host": "npx playwright test --project=host-tests",
+    "test:guest": "npx playwright test --project=guest-tests",
+    "test:collab": "npx playwright test --project=collaboration-tests",
+    "test:edge": "npx playwright test --project=edge-case-tests",
+    "test:smoke": "npx playwright test --grep @smoke",
+    "test:headed": "npx playwright test --headed",
+    "report": "npx playwright show-report",
+    "trace": "npx playwright test --trace on"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "typescript": "^5.7.0",
+    "dotenv": "^16.4.0"
+  }
+}
