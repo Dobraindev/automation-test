@@ -21,7 +21,7 @@ test.describe('수업 일정 관리', () => {
   });
 
   test('should display today button and date', async ({ page }) => {
-    await expect(page.locator('button:has-text("오늘")')).toBeVisible();
+    await expect(page.getByRole('button', { name: '오늘', exact: true })).toBeVisible();
   });
 
   test('should have child search functionality', async ({ page }) => {

@@ -27,34 +27,25 @@ export default defineConfig({
     video: 'retain-on-failure',
     actionTimeout: 15000,
     navigationTimeout: 30000,
+    storageState: 'auth/user.json',
   },
   projects: [
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
-    },
-    {
-      name: 'auth-tests',
-      testDir: './tests/auth',
-      use: { ...devices['Desktop Chrome'] },
+      use: { storageState: undefined },
     },
     {
       name: 'navigation-tests',
       testDir: './tests/navigation',
       dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'auth/user.json',
-      },
+      use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'page-tests',
       testDir: './tests/pages',
       dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'auth/user.json',
-      },
+      use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'session-tests',

@@ -1,8 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { EmergencyClassPage } from '../../src/pages/EmergencyClassPage.js';
 
-test.use({ storageState: 'auth/user.json' });
-
 test.describe('(비상용) 수업 - 세션 생성', () => {
   let emergencyPage: EmergencyClassPage;
 

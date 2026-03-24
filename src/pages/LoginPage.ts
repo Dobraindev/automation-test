@@ -19,8 +19,16 @@ export class LoginPage extends BasePage {
   }
 
   async login(name: string, password: string): Promise<void> {
-    await this.page.fill(this.s.nameInput, name);
-    await this.page.fill(this.s.passwordInput, password);
+    const nameInput = this.page.locator(this.s.nameInput);
+    await nameInput.click();
+    await nameInput.clear();
+    await nameInput.type(name, { delay: 50 });
+
+    const pwInput = this.page.locator(this.s.passwordInput);
+    await pwInput.click();
+    await pwInput.clear();
+    await pwInput.type(password, { delay: 50 });
+
     await this.page.click(this.s.submitButton);
   }
 
