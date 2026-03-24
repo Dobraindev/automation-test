@@ -18,21 +18,13 @@ export class LoginPage extends BasePage {
     await this.waitForReady();
   }
 
-  async login(userId: string, accessToken: string): Promise<void> {
-    await this.page.fill(this.s.userIdInput, userId);
-    await this.page.fill(this.s.accessTokenInput, accessToken);
+  async login(name: string, password: string): Promise<void> {
+    await this.page.fill(this.s.nameInput, name);
+    await this.page.fill(this.s.passwordInput, password);
     await this.page.click(this.s.submitButton);
   }
 
-  async getErrorMessage(): Promise<string | null> {
-    const error = this.page.locator(this.s.errorMessage);
-    if (await error.isVisible({ timeout: 3000 }).catch(() => false)) {
-      return error.textContent();
-    }
-    return null;
-  }
-
-  async getSubmitButtonText(): Promise<string | null> {
-    return this.page.locator(this.s.submitButton).textContent();
+  async isLoginPage(): Promise<boolean> {
+    return this.page.locator(this.s.submitButton).isVisible({ timeout: 3000 }).catch(() => false);
   }
 }

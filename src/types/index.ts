@@ -9,20 +9,13 @@ export interface CollaborationSession {
 }
 
 export interface UserCredentials {
-  userId: string;
-  accessToken: string;
+  name: string;
+  password: string;
 }
 
 export interface TestEnvironment {
   baseUrl: string;
-  hostCredentials: UserCredentials;
-  guestCredentials: UserCredentials;
+  credentials: UserCredentials;
   timeout: number;
   headless: boolean;
-}
-
-export interface RoomInfo {
-  roomName: string;
-  guestUrl: string;
-  hostUserId: string;
 }

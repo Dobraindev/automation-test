@@ -1,29 +1,25 @@
 import { test as base, type Page, type BrowserContext } from '@playwright/test';
-import { MeetPage } from '../pages/MeetPage.js';
-import { HostSessionPage } from '../pages/HostSessionPage.js';
-import { GuestEntryPage } from '../pages/GuestEntryPage.js';
-import { GuestSessionPage } from '../pages/GuestSessionPage.js';
-import { env } from '../config/env.js';
+import { EmergencyClassPage } from '../pages/EmergencyClassPage.js';
+import { NavigationPage } from '../pages/NavigationPage.js';
 
 type CollaborationFixtures = {
   hostPage: Page;
   guestPage: Page;
   hostContext: BrowserContext;
   guestContext: BrowserContext;
-  meetPage: MeetPage;
-  hostSession: HostSessionPage;
-  guestEntry: GuestEntryPage;
-  guestSession: GuestSessionPage;
+  hostNav: NavigationPage;
+  hostClass: EmergencyClassPage;
 };
 
 /**
- * 호스트/게스트 듀얼 컨텍스트 테스트 fixture
- * browser.newContext()로 완전 분리된 세션 생성
+ * 호스트/게스트 듀얼 컨텍스트 fixture
+ * 호스트: 로그인된 관리자
+ * 게스트: 별도 컨텍스트 (게스트 방 입장 링크로 접근)
  */
 export const collaborationTest = base.extend<CollaborationFixtures>({
   hostContext: async ({ browser }, use) => {
     const context = await browser.newContext({
-      storageState: 'auth/host.json',
+      storageState: 'auth/user.json',
       permissions: ['microphone', 'camera'],
     });
     await use(context);
@@ -32,7 +28,6 @@ export const collaborationTest = base.extend<CollaborationFixtures>({
 
   guestContext: async ({ browser }, use) => {
     const context = await browser.newContext({
-      storageState: 'auth/guest.json',
       permissions: ['microphone', 'camera'],
     });
     await use(context);
@@ -49,19 +44,11 @@ export const collaborationTest = base.extend<CollaborationFixtures>({
     await use(page);
   },
 
-  meetPage: async ({ hostPage }, use) => {
-    await use(new MeetPage(hostPage, env.hostCredentials.userId));
+  hostNav: async ({ hostPage }, use) => {
+    await use(new NavigationPage(hostPage));
   },
 
-  hostSession: async ({ hostPage }, use) => {
-    await use(new HostSessionPage(hostPage));
-  },
-
-  guestEntry: async ({ guestPage }, use) => {
-    await use(new GuestEntryPage(guestPage));
-  },
-
-  guestSession: async ({ guestPage }, use) => {
-    await use(new GuestSessionPage(guestPage));
+  hostClass: async ({ hostPage }, use) => {
+    await use(new EmergencyClassPage(hostPage));
   },
 });
