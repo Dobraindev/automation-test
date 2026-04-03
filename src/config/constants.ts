@@ -24,6 +24,7 @@ export const ROUTES = {
   promptTest: '/main/prompt-test',
   emergencyClass: '/main',
   member: '/main/member',
+  guestTest: '/client-guest?mode=test',
 } as const;
 
 /**
@@ -79,6 +80,7 @@ export const SELECTORS = {
 
   // 진행자 근무 관리 (/main/schedule)
   schedule: {
+    assignTab: 'button:has-text("진행자 배정 관리")',
     fixedTab: 'button:has-text("고정 시간표 관리")',
     tempTab: 'button:has-text("임시 휴무 관리")',
     facilitatorSelect: 'select',
@@ -183,6 +185,43 @@ export const SELECTORS = {
   member: {
     addMemberButton: 'button:has-text("새 멤버 추가")',
     memberTable: 'table',
+  },
+
+  // 게스트 페이지 (/client-guest)
+  guest: {
+    nameInput: 'input[placeholder*="이름"]',
+    phoneInput: 'input[placeholder*="전화번호"]',
+    sessionIndexInput: 'input[placeholder*="인덱스"]',
+    enterButton: 'button:has-text("입장하기")',
+    logoutButton: 'button:has-text("로그아웃")',
+    fromStartButton: 'button:has-text("처음부터")',
+    continueButton: 'button:has-text("이어하기")',
+    startButton: 'button:has-text("시작")',
+    helpButton: 'button:has-text("도움이 필요해요")',
+    loadingText: 'text=친구가 만날 준비를 하고 있어요!',
+    camera: 'video',
+  },
+
+  // 호스트(모니터링) 페이지
+  host: {
+    nextButton: 'button:has-text("Next")',
+    dashboardBackButton: 'button:has-text("대시보드로 가기")',
+    resetButton: 'text=회기를 초기화하고 처음부터 다시 시작합니다',
+    endClassButton: 'text=수업을 종료하고 게스트를 퇴장시킵니다',
+    forceEndButton: 'button:has-text("강제퇴장")',
+    startDialogButton: 'button:has-text("시작")',
+    confirmButton: 'button:has-text("확인")',
+    autoToggle: 'text=자동 전환',
+    sttToggle: 'text=STT만 보기',
+    messageInput: 'input[placeholder*="메시지 입력"]',
+    sendButton: 'button:has-text("전송")',
+    userVideo: 'text=User',
+    aiScreen: 'text=AI Screen',
+    disconnected: 'text=DISCONNECTED',
+    activityList: 'text=ACTIVITY',
+    sessionEndComplete: 'text=완료',
+    sessionEndStop: 'text=중단',
+    sessionEndCancel: 'text=취소',
   },
 } as const;
 

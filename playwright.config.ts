@@ -30,28 +30,80 @@ export default defineConfig({
     storageState: 'auth/user.json',
   },
   projects: [
+    // ── 공통 setup ──
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
       use: { storageState: undefined },
     },
+
+    // ── E2E 테스트 (최종 목표) ──
     {
-      name: 'navigation-tests',
-      testDir: './tests/navigation',
+      name: 'e2e',
+      testDir: './tests/e2e',
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['microphone', 'camera'],
+        launchOptions: {
+          args: [
+            '--use-fake-device-for-media-stream',
+            '--use-fake-ui-for-media-stream',
+          ],
+        },
+      },
+    },
+
+    // ── Edge Case 테스트 ──
+    {
+      name: 'edge-cases',
+      testDir: './tests/edge-cases',
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['microphone', 'camera'],
+        launchOptions: {
+          args: [
+            '--use-fake-device-for-media-stream',
+            '--use-fake-ui-for-media-stream',
+          ],
+        },
+      },
+    },
+
+    // ── 배포전TC (기존 테스트 보관) ──
+    {
+      name: '배포전TC-navigation',
+      testDir: './tests/배포전TC/navigation',
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'page-tests',
-      testDir: './tests/pages',
+      name: '배포전TC-pages',
+      testDir: './tests/배포전TC/pages',
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'session-tests',
-      testDir: './tests/session',
+      name: '배포전TC-session',
+      testDir: './tests/배포전TC/session',
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: '배포전TC-collaboration',
+      testDir: './tests/배포전TC/collaboration',
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['microphone', 'camera'],
+        launchOptions: {
+          args: [
+            '--use-fake-device-for-media-stream',
+            '--use-fake-ui-for-media-stream',
+          ],
+        },
+      },
     },
   ],
 });
