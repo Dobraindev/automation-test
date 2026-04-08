@@ -3,16 +3,13 @@
   "version": "1.0.0",
   "description": "E2E test automation for real-time collaboration web service",
   "scripts": {
-    "test": "npx playwright test",
-    "test:auth": "npx playwright test --project=auth-tests",
-    "test:host": "npx playwright test --project=host-tests",
-    "test:guest": "npx playwright test --project=guest-tests",
-    "test:collab": "npx playwright test --project=collaboration-tests",
-    "test:edge": "npx playwright test --project=edge-case-tests",
-    "test:smoke": "npx playwright test --grep @smoke",
-    "test:headed": "npx playwright test --headed",
+    "test": "npx playwright test --workers=1",
+    "test:e2e": "npx playwright test --project=e2e --workers=1",
+    "test:edge": "npx playwright test --project=edge-cases --workers=1",
+    "test:deploy": "npx playwright test --project='배포전TC-navigation' --project='배포전TC-pages' --project='배포전TC-session' --project='배포전TC-collaboration'",
+    "test:headed": "npx playwright test --headed --workers=1",
     "report": "npx playwright show-report",
-    "trace": "npx playwright test --trace on"
+    "set-url": "node -e \"const fs=require('fs'); const e=fs.readFileSync('.env','utf8'); fs.writeFileSync('.env', e.replace(/BASE_URL=.*/,'BASE_URL='+process.argv[1]));\" "
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0",

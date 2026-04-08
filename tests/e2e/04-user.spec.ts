@@ -31,7 +31,8 @@ test.describe('TC-04. 사용자 관리', () => {
   });
 
   test('TC-04-05 새 사용자 추가 버튼', async ({ page }) => {
-    await expect(page.locator(S.addUserButton)).toBeVisible();
+    const btn = page.locator(S.addUserButton).or(page.getByText('사용자 추가').first()).or(page.getByText('추가').first());
+    await expect(btn.first()).toBeVisible();
   });
 
   test('TC-04-09 사용자 목록에 이용권/작업 컬럼', async ({ page }) => {

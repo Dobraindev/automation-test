@@ -8,12 +8,16 @@ test.describe('Navigation', () => {
     const essentialTabs = [
       '수업 일정', '진행자 근무 관리', '사용자', '활동',
       '메시지', '리소스', '아바타', '활동 템플릿',
-      '회기 템플릿', '커리큘럼', '프롬프트 변수', '로그',
+      '회기 템플릿', '프롬프트 변수', '로그',
       '테스트', '권한 관리',
     ];
     for (const tab of essentialTabs) {
       await expect(page.getByRole('link', { name: tab, exact: true })).toBeVisible();
     }
+    // 커리큘럼 or 학습플랜 (dev/staging 차이)
+    const curriculumLink = page.getByRole('link', { name: '커리큘럼', exact: true })
+      .or(page.getByRole('link', { name: '학습플랜', exact: true }));
+    await expect(curriculumLink.first()).toBeVisible();
   });
 
   test('should show admin user name in header', async ({ page }) => {
@@ -22,7 +26,7 @@ test.describe('Navigation', () => {
   });
 
   test.describe('Tab Navigation', () => {
-    const tabRoutes: [string, string][] = [
+    const tabRoutes: [string, string, string?][] = [
       ['수업 일정', '/main/class-mgmt'],
       ['진행자 근무 관리', '/main/schedule'],
       ['사용자', '/main/user'],
@@ -31,17 +35,20 @@ test.describe('Navigation', () => {
       ['아바타', '/main/avatars'],
       ['활동 템플릿', '/main/activity-template'],
       ['회기 템플릿', '/main/lesson-template'],
-      ['커리큘럼', '/main/curriculum'],
+      ['커리큘럼', '/main/curriculum', '학습플랜'],
       ['프롬프트 변수', '/main/prompt-variable'],
       ['로그', '/main/log'],
       ['테스트', '/main/prompt-test'],
       ['권한 관리', '/main/member'],
     ];
 
-    for (const [tabName, expectedUrl] of tabRoutes) {
+    for (const [tabName, expectedUrl, altName] of tabRoutes) {
       test(`should navigate to "${tabName}"`, async ({ page }) => {
         await page.goto(ROUTES.classMgmt);
-        await page.getByRole('link', { name: tabName }).click();
+        const link = altName
+          ? page.getByRole('link', { name: tabName }).or(page.getByRole('link', { name: altName })).first()
+          : page.getByRole('link', { name: tabName });
+        await link.click();
         await page.waitForLoadState('domcontentloaded');
         await expect(page).toHaveURL(new RegExp(expectedUrl));
       });

@@ -88,11 +88,16 @@ test.describe('회기 템플릿', () => {
   });
 });
 
-test.describe('커리큘럼', () => {
+test.describe('커리큘럼/학습플랜', () => {
   test('should display curriculum page @smoke', async ({ page }) => {
     await page.goto(ROUTES.curriculum);
-    await expect(page.getByRole('heading', { name: '커리큘럼 관리' })).toBeVisible();
-    await expect(page.locator('button:has-text("새 커리큘럼")')).toBeVisible();
+    // dev: 학습플랜 관리, staging: 커리큘럼 관리
+    const heading = page.getByRole('heading', { name: '커리큘럼 관리' })
+      .or(page.getByRole('heading', { name: '학습플랜 관리' }));
+    await expect(heading.first()).toBeVisible();
+    const createBtn = page.locator('button:has-text("새 커리큘럼")')
+      .or(page.locator('button:has-text("새 학습플랜")'));
+    await expect(createBtn.first()).toBeVisible();
   });
 });
 
