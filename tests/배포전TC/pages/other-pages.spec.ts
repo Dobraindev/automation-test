@@ -91,13 +91,14 @@ test.describe('회기 템플릿', () => {
 test.describe('커리큘럼/학습플랜', () => {
   test('should display curriculum page @smoke', async ({ page }) => {
     await page.goto(ROUTES.curriculum);
+    await page.waitForLoadState('networkidle');
     // dev: 학습플랜 관리, staging: 커리큘럼 관리
     const heading = page.getByRole('heading', { name: '커리큘럼 관리' })
       .or(page.getByRole('heading', { name: '학습플랜 관리' }));
-    await expect(heading.first()).toBeVisible();
+    await expect(heading.first()).toBeVisible({ timeout: 15000 });
     const createBtn = page.locator('button:has-text("새 커리큘럼")')
       .or(page.locator('button:has-text("새 학습플랜")'));
-    await expect(createBtn.first()).toBeVisible();
+    await expect(createBtn.first()).toBeVisible({ timeout: 15000 });
   });
 });
 

@@ -65,13 +65,16 @@ test.describe('TC-17. 세션 E2E - 게스트/호스트 진입', () => {
     await guestPage.locator(SELECTORS.guest.enterButton).click();
 
     const fromStart = guestPage.locator(SELECTORS.guest.fromStartButton);
+    const continueBtn = guestPage.locator(SELECTORS.guest.continueButton);
     const loading = guestPage.locator('text=친구가 만날 준비를 하고 있어요');
     const ready = guestPage.locator('text=준비됐나요');
 
-    await expect(fromStart.or(loading).or(ready).first()).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(fromStart.or(continueBtn).or(loading).or(ready).first()).toBeVisible({ timeout: TIMEOUTS.long });
 
     if (await fromStart.isVisible({ timeout: 3000 }).catch(() => false)) {
       await fromStart.click();
+    } else if (await continueBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await continueBtn.click();
     }
   });
 
@@ -136,8 +139,11 @@ test.describe('TC-17. 세션 E2E - 게스트/호스트 진입', () => {
     expect(found).toBe(true);
   });
 
-  test('TC-17-12 호스트 Next 버튼 표시', async () => {
-    await expect(hostPage.locator(SELECTORS.host.nextButton)).toBeVisible();
+  test('TC-17-12 호스트 활동 전환 UI 표시', async () => {
+    // Next 버튼 또는 자동 전환 체크박스 (release에 따라 다름)
+    const nextBtn = hostPage.locator(SELECTORS.host.nextButton);
+    const autoToggle = hostPage.getByText('자동 전환');
+    await expect(nextBtn.or(autoToggle).first()).toBeVisible({ timeout: TIMEOUTS.medium });
   });
 
   test('TC-17-13 호스트 User 카메라 영역', async () => {
