@@ -105,5 +105,22 @@ export default defineConfig({
         },
       },
     },
+
+    // ── 호스트 중복 접속 제어 (매일 검증) ──
+    {
+      name: '배포전TC-access-control',
+      testDir: './tests/배포전TC/access-control',
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        permissions: ['microphone', 'camera'],
+        launchOptions: {
+          args: [
+            '--use-fake-device-for-media-stream',
+            '--use-fake-ui-for-media-stream',
+          ],
+        },
+      },
+    },
   ],
 });

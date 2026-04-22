@@ -16,6 +16,7 @@ export interface UserCredentials {
 export interface TestEnvironment {
   baseUrl: string;
   credentials: UserCredentials;
+  credentialsB?: UserCredentials;
   timeout: number;
   headless: boolean;
 }

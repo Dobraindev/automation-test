@@ -7,6 +7,10 @@ export function getEnvironment(): TestEnvironment {
       name: process.env.USER_NAME || '',
       password: process.env.USER_PASSWORD || '',
     },
+    credentialsB: process.env.USER_B_NAME ? {
+      name: process.env.USER_B_NAME,
+      password: process.env.USER_B_PASSWORD || '',
+    } : undefined,
     timeout: Number(process.env.TEST_TIMEOUT) || 60000,
     headless: process.env.HEADLESS !== 'false',
   };
