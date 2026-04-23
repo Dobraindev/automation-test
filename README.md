@@ -158,25 +158,6 @@ BASE_URL=... npx playwright test --debug tests/e2e/17-session-entry.spec.ts
 
 ---
 
-## 🕐 매일 자동 검증 (TC-21 호스트 중복 접속 제어)
-
-호스트 중복 접속 제어 기능은 **매일 자동으로** 검증됩니다.
-
-### GitHub Actions (기본 설정)
-`.github/workflows/daily-access-control.yml` 에 정의됨
-- **실행 시각**: 매일 오전 9시 KST
-- **수동 실행**: GitHub → Actions → "Daily Host Access Control Check" → Run workflow
-- **필요한 Secrets**: `USER_NAME`, `USER_PASSWORD`, `USER_B_NAME`, `USER_B_PASSWORD`, `SLACK_WEBHOOK_URL`(선택)
-
-### 로컬 cron
-```bash
-crontab -e
-# 매일 오전 9시 실행
-0 9 * * * cd /path/to/automation-test && ./scripts/daily-access-control.sh
-```
-
----
-
 ## ⚠️ 자주 겪는 이슈
 
 | 증상 | 해결 |
@@ -201,7 +182,7 @@ tests/
     ├── pages/                     # 각 페이지 기본 기능
     ├── session/                   # 세션 생성
     ├── collaboration/             # 멀티탭 세션
-    └── access-control/            # TC-21 호스트 중복 접속 제어 (매일 검증)
+    └── access-control/            # TC-21 호스트 중복 접속 제어
 
 src/
 ├── config/constants.ts            # 셀렉터/URL 중앙 관리
