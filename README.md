@@ -1,21 +1,217 @@
 # E2E Test Automation - 두부핑퐁
 
-## 개요
-두부핑퐁 관리 대시보드(`ppistaging.dubuhealth.in`)의 **End-to-End 테스트 자동화** 프로젝트
+두부핑퐁 관리 대시보드의 **End-to-End 테스트 자동화** 프로젝트
 
 - **프레임워크**: Playwright + TypeScript
-- **레포**: https://github.com/dubu-harry/e2e-automation
+- **레포**: https://github.com/Dobraindev/automation-test
+- **커버리지**: 200여개 TC (E2E + Edge Cases + 배포전TC + 호스트 중복 접속 제어)
 
-## 실행 방법
+---
+
+## 🚀 최초 세팅 (1회)
 
 ```bash
-npm install
-npx playwright install chromium
-cp .env.example .env  # 계정 정보 입력
+# 1. 레포 클론
+git clone https://github.com/Dobraindev/automation-test.git
+cd automation-test
 
-npx playwright test --project=e2e                       # E2E 테스트
-npx playwright test --project='배포전TC-collaboration'   # 배포전TC
-npx playwright show-report                              # 리포트
+# 2. 의존성 설치
+npm install
+
+# 3. Playwright 브라우저 설치
+npx playwright install chromium
+
+# 4. 환경변수 파일 생성
+cp .env.example .env
+# .env 파일 열어서 계정 정보 입력 (USER_NAME, USER_PASSWORD, USER_B_NAME, USER_B_PASSWORD)
+```
+
+> **필요한 계정**
+> - **Host A**: 일반 테스트용 (`해리 / 0306`)
+> - **Host B**: TC-21 호스트 중복 접속 제어 검증용 (`진행해리 / 0306`)
+
+---
+
+## 🧪 테스트 실행
+
+> ⚠️ **테스트 URL은 매일 변경됩니다.** 배포 담당자에게 오늘의 URL 확인 후 실행하세요.
+
+### 방법 1: 환경변수로 즉석 실행 (가장 간단)
+
+```bash
+BASE_URL=https://release-1-XX-0-dev.dubuhealth.in npx playwright test --workers=1
+```
+
+→ 터미널에 진행 상황과 최종 결과가 실시간으로 찍힘
+
+### 방법 2: .env 파일 수정 후 실행
+
+```bash
+# .env 파일에서 BASE_URL 변경
+sed -i '' 's|^BASE_URL=.*|BASE_URL=https://release-1-XX-0-dev.dubuhealth.in|' .env
+
+# 전체 테스트 실행 (약 13분 소요)
+npx playwright test --workers=1
+```
+
+### 실행 결과 예시
+
+```
+Running 196 tests using 1 worker
+
+  ✓   1 [setup] › tests/auth/auth.setup.ts:5:6 › authenticate user (1.1s)
+  ✓   2 [e2e] › tests/e2e/01-class-mgmt.spec.ts:5:7 › 수업 일정 관리 (668ms)
+  ...
+  ✓ 196 [배포전TC-access-control] › TC-21-05 호스트 B 재진입 성공 (6.8s)
+
+  196 passed (13.4m)
+```
+
+---
+
+## 📋 특정 범위만 실행하기
+
+### 카테고리별 실행
+
+```bash
+# 배포전 필수 TC (빠른 검증 - 약 3분)
+BASE_URL=... npx playwright test \
+  --project='배포전TC-navigation' \
+  --project='배포전TC-pages' \
+  --project='배포전TC-session' \
+  --project='배포전TC-collaboration' \
+  --project='배포전TC-access-control' \
+  --workers=1
+
+# E2E 전체 (20개 파일)
+BASE_URL=... npx playwright test --project='e2e' --workers=1
+
+# Edge Cases만 (7개 파일)
+BASE_URL=... npx playwright test --project='edge-cases' --workers=1
+
+# TC-21 호스트 중복 접속 제어만 (약 1분)
+BASE_URL=... npx playwright test --project='배포전TC-access-control' --workers=1
+```
+
+### 특정 파일만 실행
+
+```bash
+# 특정 TC 파일
+BASE_URL=... npx playwright test tests/e2e/17-session-entry.spec.ts --workers=1
+
+# 특정 테스트 이름으로 필터
+BASE_URL=... npx playwright test -g "TC-21" --workers=1
+BASE_URL=... npx playwright test -g "호스트" --workers=1
+```
+
+---
+
+## 📊 리포트 보기
+
+```bash
+# 실행 후 HTML 리포트 자동 오픈
+BASE_URL=... npx playwright test --workers=1 && npx playwright show-report
+
+# 이미 돌린 결과 리포트만 열기
+npx playwright show-report
+```
+
+### 실패 시 확인 경로
+- **스크린샷**: `test-results/*/test-failed-*.png`
+- **비디오**: `test-results/*/video.webm`
+- **에러 컨텍스트**: `test-results/*/error-context.md`
+- **HTML 리포트**: `playwright-report/index.html`
+
+---
+
+## 🎨 출력 형식 옵션
+
+```bash
+# 간결하게 점/F로만 표시
+BASE_URL=... npx playwright test --reporter=dot --workers=1
+
+# 실패한 것만 자세히
+BASE_URL=... npx playwright test --reporter=line --workers=1
+
+# 결과를 파일로도 저장
+BASE_URL=... npx playwright test --workers=1 2>&1 | tee result.log
+```
+
+---
+
+## 🔧 디버깅
+
+### UI 모드 (테스트 실행 과정을 시각적으로 확인)
+```bash
+BASE_URL=... npx playwright test --ui
+```
+
+### Headed 모드 (브라우저 창 띄우고 실행)
+```bash
+HEADLESS=false BASE_URL=... npx playwright test --workers=1
+```
+
+### 특정 테스트만 디버그
+```bash
+BASE_URL=... npx playwright test --debug tests/e2e/17-session-entry.spec.ts
+```
+
+---
+
+## 🕐 매일 자동 검증 (TC-21 호스트 중복 접속 제어)
+
+호스트 중복 접속 제어 기능은 **매일 자동으로** 검증됩니다.
+
+### GitHub Actions (기본 설정)
+`.github/workflows/daily-access-control.yml` 에 정의됨
+- **실행 시각**: 매일 오전 9시 KST
+- **수동 실행**: GitHub → Actions → "Daily Host Access Control Check" → Run workflow
+- **필요한 Secrets**: `USER_NAME`, `USER_PASSWORD`, `USER_B_NAME`, `USER_B_PASSWORD`, `SLACK_WEBHOOK_URL`(선택)
+
+### 로컬 cron
+```bash
+crontab -e
+# 매일 오전 9시 실행
+0 9 * * * cd /path/to/automation-test && ./scripts/daily-access-control.sh
+```
+
+---
+
+## ⚠️ 자주 겪는 이슈
+
+| 증상 | 해결 |
+|------|------|
+| `connect ECONNREFUSED` | 테스트 URL이 유효하지 않음. 배포 담당자에게 오늘의 URL 확인 |
+| `502 Bad Gateway` 스크린샷 | 서버가 배포 중이거나 다운됨. 잠시 후 재시도 |
+| `auth/user.json` 관련 에러 | `npx playwright test --project=setup` 으로 로그인 다시 저장 |
+| `timeout` 에러 다수 발생 | 네트워크 확인. `--workers=1` 옵션 유지 |
+| 한글 입력 실패 | Playwright 버전 확인 (`npx playwright --version`) |
+
+---
+
+## 📁 프로젝트 구조
+
+```
+tests/
+├── auth/                          # 로그인 setup
+├── e2e/                           # E2E 전체 테스트 (TC-01~20)
+├── edge-cases/                    # 엣지 케이스 (EDGE-01~07)
+└── 배포전TC/                      # 배포 전 필수 검증
+    ├── navigation/                # 네비게이션
+    ├── pages/                     # 각 페이지 기본 기능
+    ├── session/                   # 세션 생성
+    ├── collaboration/             # 멀티탭 세션
+    └── access-control/            # TC-21 호스트 중복 접속 제어 (매일 검증)
+
+src/
+├── config/constants.ts            # 셀렉터/URL 중앙 관리
+├── config/env.ts                  # 환경변수 로더
+├── fixtures/                      # 인증/협업 fixture
+└── pages/                         # Page Object
+
+playwright.config.ts               # 프로젝트 설정
+.env                               # 테스트 URL, 계정 (로컬만, gitignore)
+.env.example                       # 환경변수 템플릿
 ```
 
 ---
