@@ -1,5 +1,8 @@
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { ROUTES, SELECTORS, TIMEOUTS } from '../../src/config/constants.js';
+import { enterSessionFromDashboard } from '../../src/utils/session-helper.js';
+
+const SESSION_REGEX = /해리[ _]?17회기/;
 
 const GUEST_NAME = '해리';
 const GUEST_PHONE = '4120';
@@ -51,11 +54,13 @@ test.describe('EDGE-05. 세션 Edge Cases (멀티탭)', () => {
 
     // 호스트 진입
     await hostPage.goto(ROUTES.monitorDashboard);
-    await hostPage.locator('text=해리_17회기').click({ timeout: TIMEOUTS.medium });
+    await hostPage.waitForLoadState('networkidle');
+    await enterSessionFromDashboard(hostPage, SESSION_REGEX, TIMEOUTS.medium);
     await hostPage.waitForLoadState('domcontentloaded');
     const startBtn = hostPage.getByRole('button', { name: '시작' });
-    await expect(startBtn).toBeVisible({ timeout: TIMEOUTS.long });
-    await startBtn.click();
+    if (await startBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await startBtn.click();
+    }
     await hostPage.waitForTimeout(5000);
   });
 

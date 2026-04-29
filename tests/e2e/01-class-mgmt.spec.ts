@@ -17,8 +17,10 @@ test.describe('TC-01. 수업 일정 관리', () => {
   });
 
   test('TC-01-02 오늘 수업 기본 표시 - 테이블 컬럼 확인', async ({ page }) => {
-    await expect(page.getByText('시간').first()).toBeVisible();
+    await page.waitForTimeout(2000);
+    // 1.65.0+: "시간" 헤더 사라지고 시간 그룹("12:00 - 12:20") 형식으로 표시
     await expect(page.getByText('아동').first()).toBeVisible();
+    await expect(page.getByText('회기').first()).toBeVisible();
   });
 
   test('TC-01-03 전체 수업 탭 전환', async ({ page }) => {

@@ -1,5 +1,8 @@
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { ROUTES, SELECTORS, TIMEOUTS } from '../../src/config/constants.js';
+import { enterSessionFromDashboard, dismissStartDialog, clickButtonByText } from '../../src/utils/session-helper.js';
+
+const SESSION_REGEX = /해리[ _]?17회기/;
 
 /**
  * TC-19. 세션 E2E - 호스트 컨트롤 (멀티탭)
@@ -59,7 +62,7 @@ test.describe('TC-19. 세션 E2E - 호스트 컨트롤', () => {
       // 호스트 진입
       await hostPage.goto(ROUTES.monitorDashboard);
       await hostPage.waitForLoadState('networkidle');
-      await hostPage.locator('text=해리_17회기').click({ timeout: TIMEOUTS.medium });
+      await enterSessionFromDashboard(hostPage, SESSION_REGEX, TIMEOUTS.medium);
       await hostPage.waitForLoadState('domcontentloaded');
       const startBtn = hostPage.getByRole('button', { name: '시작' });
       try {
@@ -127,7 +130,13 @@ test.describe('TC-19. 세션 E2E - 호스트 컨트롤', () => {
 
   test('TC-19-07 수업 종료 다이얼로그', async () => {
     test.skip(!sessionReady, '세션 진입 실패');
-    await hostPage.locator('button:has-text("수업 종료")').click();
+    // 1.65.0+: 시작 다이얼로그가 자동 재출현하므로 JS 직접 클릭으로 모달 우회
+    await dismissStartDialog(hostPage, 2);
+    const ok = await clickButtonByText(hostPage, '수업 종료');
+    if (!ok) {
+      await hostPage.locator('button:has-text("수업 종료")').click({ force: true });
+    }
+
     await expect(hostPage.getByText('회기 종료')).toBeVisible({ timeout: TIMEOUTS.medium });
     await expect(hostPage.getByText('완료').first()).toBeVisible();
     await expect(hostPage.getByText('중단').first()).toBeVisible();

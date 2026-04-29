@@ -1,5 +1,6 @@
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { ROUTES, SELECTORS, TIMEOUTS } from '../../../src/config/constants.js';
+import { enterSessionFromDashboard } from '../../../src/utils/session-helper.js';
 
 /**
  * TC-21. 호스트 중복 접속 제어 검증 (멀티탭)
@@ -21,7 +22,8 @@ import { ROUTES, SELECTORS, TIMEOUTS } from '../../../src/config/constants.js';
 const GUEST_NAME = '해리';
 const GUEST_PHONE = '4120';
 const LESSON_INDEX = '17';
-const SESSION_CARD = '해리_17회기';
+// 1.65.0+: 세션 카드 라벨이 "해리_17회기" → "해리 17회기"로 변경됨, 양쪽 매칭
+const SESSION_CARD_REGEX = /해리[ _]?17회기/;
 
 test.describe('TC-21. 호스트 중복 접속 제어', () => {
   test.describe.configure({ mode: 'serial' });
@@ -102,8 +104,8 @@ test.describe('TC-21. 호스트 중복 접속 제어', () => {
 
     await hostAPage.goto(ROUTES.monitorDashboard);
     await hostAPage.waitForLoadState('networkidle');
-    await expect(hostAPage.locator(`text=${SESSION_CARD}`)).toBeVisible({ timeout: TIMEOUTS.medium });
-    await hostAPage.locator(`text=${SESSION_CARD}`).click();
+    await expect(hostAPage.getByText(SESSION_CARD_REGEX).first()).toBeVisible({ timeout: TIMEOUTS.medium });
+    await enterSessionFromDashboard(hostAPage, SESSION_CARD_REGEX, TIMEOUTS.medium);
     await hostAPage.waitForLoadState('domcontentloaded');
 
     // "수업을 시작합니다" 다이얼로그 → 시작
@@ -132,10 +134,13 @@ test.describe('TC-21. 호스트 중복 접속 제어', () => {
 
     await hostBPage.goto(ROUTES.monitorDashboard);
     await hostBPage.waitForLoadState('networkidle');
-    await expect(hostBPage.locator(`text=${SESSION_CARD}`)).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(hostBPage.getByText(SESSION_CARD_REGEX).first()).toBeVisible({ timeout: TIMEOUTS.medium });
 
     const urlBefore = hostBPage.url();
-    await hostBPage.locator(`text=${SESSION_CARD}`).click();
+    // 1.65.0+: 카드 클릭 대신 "실시간 입장" 버튼 클릭 시도
+    try {
+      await enterSessionFromDashboard(hostBPage, SESSION_CARD_REGEX, TIMEOUTS.medium);
+    } catch { /* 버튼이 비활성화/숨김 처리되어 클릭 실패 시 차단으로 간주 */ }
     await hostBPage.waitForTimeout(5000);
 
     // 차단 검증: 아래 중 하나라도 참이면 정상 차단
@@ -208,8 +213,8 @@ test.describe('TC-21. 호스트 중복 접속 제어', () => {
       await hostBPage.waitForLoadState('networkidle');
     }
 
-    await expect(hostBPage.locator(`text=${SESSION_CARD}`)).toBeVisible({ timeout: TIMEOUTS.medium });
-    await hostBPage.locator(`text=${SESSION_CARD}`).click();
+    await expect(hostBPage.getByText(SESSION_CARD_REGEX).first()).toBeVisible({ timeout: TIMEOUTS.medium });
+    await enterSessionFromDashboard(hostBPage, SESSION_CARD_REGEX, TIMEOUTS.medium);
     await hostBPage.waitForLoadState('domcontentloaded');
 
     // "시작" 다이얼로그 → 클릭

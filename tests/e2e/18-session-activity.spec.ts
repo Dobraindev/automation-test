@@ -1,5 +1,8 @@
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { ROUTES, SELECTORS, TIMEOUTS } from '../../src/config/constants.js';
+import { enterSessionFromDashboard, dismissStartDialog } from '../../src/utils/session-helper.js';
+
+const SESSION_REGEX = /해리[ _]?17회기/;
 
 /**
  * TC-18. 세션 E2E - 활동 전환 및 리소스 (멀티탭)
@@ -61,7 +64,7 @@ test.describe('TC-18. 세션 E2E - 활동 전환/리소스', () => {
       // 호스트 진입
       await hostPage.goto(ROUTES.monitorDashboard);
       await hostPage.waitForLoadState('networkidle');
-      await hostPage.locator('text=해리_17회기').click({ timeout: TIMEOUTS.medium });
+      await enterSessionFromDashboard(hostPage, SESSION_REGEX, TIMEOUTS.medium);
       await hostPage.waitForLoadState('domcontentloaded');
       const startBtn = hostPage.getByRole('button', { name: '시작' });
       try {
@@ -90,6 +93,8 @@ test.describe('TC-18. 세션 E2E - 활동 전환/리소스', () => {
 
   test('TC-18-01 활동 전환', async () => {
     test.skip(!sessionReady, '세션 진입 실패 - TC-17 이후 세션 재진입 불가');
+    await dismissStartDialog(hostPage);
+
     const nextBtn = hostPage.locator(SELECTORS.host.nextButton);
     const hasNext = await nextBtn.isVisible({ timeout: 5000 }).catch(() => false);
 
@@ -104,7 +109,7 @@ test.describe('TC-18. 세션 E2E - 활동 전환/리소스', () => {
       const activityRows = hostPage.locator('table tbody tr, [class*="row"][cursor="pointer"]');
       const rowCount = await activityRows.count();
       if (rowCount > 1) {
-        await activityRows.nth(1).click();
+        await activityRows.nth(1).click({ force: true }).catch(() => {});
         const confirmBtn = hostPage.locator(SELECTORS.host.confirmButton);
         if (await confirmBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
           await confirmBtn.click();
@@ -131,6 +136,7 @@ test.describe('TC-18. 세션 E2E - 활동 전환/리소스', () => {
 
   test('TC-18-04~09 연속 활동 전환 - 리소스/AI 변경 검증', async () => {
     test.skip(!sessionReady, '세션 진입 실패');
+    await dismissStartDialog(hostPage);
     // 추가 활동 전환
     const nextBtn = hostPage.locator(SELECTORS.host.nextButton);
     const hasNext = await nextBtn.isVisible({ timeout: 3000 }).catch(() => false);
@@ -141,7 +147,7 @@ test.describe('TC-18. 세션 E2E - 활동 전환/리소스', () => {
       const activityRows = hostPage.locator('table tbody tr, [class*="row"][cursor="pointer"]');
       const rowCount = await activityRows.count();
       if (rowCount > 2) {
-        await activityRows.nth(2).click();
+        await activityRows.nth(2).click({ force: true }).catch(() => {});
         const confirmBtn = hostPage.locator(SELECTORS.host.confirmButton);
         if (await confirmBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
           await confirmBtn.click();

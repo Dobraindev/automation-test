@@ -1,5 +1,8 @@
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { ROUTES, SELECTORS, TIMEOUTS } from '../../src/config/constants.js';
+import { enterSessionFromDashboard } from '../../src/utils/session-helper.js';
+
+const SESSION_REGEX = /해리[ _]?17회기/;
 
 /**
  * TC-17. 세션 E2E - 게스트/호스트 진입 플로우 (멀티탭)
@@ -95,11 +98,11 @@ test.describe('TC-17. 세션 E2E - 게스트/호스트 진입', () => {
 
   test('TC-17-08 모니터 대시보드에 해리_17회기 표시', async () => {
     await hostPage.goto(ROUTES.monitorDashboard);
-    await expect(hostPage.locator('text=해리_17회기')).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(hostPage.locator('text=/해리[ _]?17회기/')).toBeVisible({ timeout: TIMEOUTS.medium });
   });
 
   test('TC-17-09 호스트 해리_17회기 클릭 진입', async () => {
-    await hostPage.locator('text=해리_17회기').click();
+    await enterSessionFromDashboard(hostPage, SESSION_REGEX, TIMEOUTS.medium);
     await hostPage.waitForLoadState('domcontentloaded');
   });
 

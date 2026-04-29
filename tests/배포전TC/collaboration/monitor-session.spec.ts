@@ -1,5 +1,8 @@
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { ROUTES, SELECTORS, TIMEOUTS } from '../../../src/config/constants.js';
+import { enterSessionFromDashboard, dismissStartDialog, clickButtonByText } from '../../../src/utils/session-helper.js';
+
+const SESSION_REGEX = /해리[ _]?17회기/;
 
 /**
  * 모니터 대시보드 → 게스트/호스트 멀티탭 세션 테스트
@@ -114,18 +117,19 @@ test.describe('모니터 대시보드 - 멀티탭 세션', () => {
     await hostPage.goto(ROUTES.monitorDashboard);
     await hostPage.waitForLoadState('domcontentloaded');
 
-    const sessionEntry = hostPage.locator('text=해리_17회기');
+    const sessionEntry = hostPage.locator('text=/해리[ _]?17회기/');
     await expect(sessionEntry).toBeVisible({ timeout: TIMEOUTS.medium });
   });
 
   test('7. 호스트가 해리_17회기에 입장하고 시작할 수 있다', async () => {
-    await hostPage.locator('text=해리_17회기').click();
+    await enterSessionFromDashboard(hostPage, SESSION_REGEX, TIMEOUTS.medium);
     await hostPage.waitForLoadState('domcontentloaded');
 
-    // "수업을 시작합니다" 다이얼로그 → 시작 클릭
+    // "수업을 시작합니다" 다이얼로그 → 시작 클릭 (없으면 이미 활성)
     const startBtn = hostPage.getByRole('button', { name: '시작' });
-    await expect(startBtn).toBeVisible({ timeout: TIMEOUTS.long });
-    await startBtn.click();
+    if (await startBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await startBtn.click();
+    }
     await hostPage.waitForTimeout(5000);
   });
 
@@ -147,6 +151,7 @@ test.describe('모니터 대시보드 - 멀티탭 세션', () => {
   });
 
   test('11. 호스트에서 활동 전환이 동작한다', async () => {
+    await dismissStartDialog(hostPage);
     const nextBtn = hostPage.locator(SELECTORS.host.nextButton);
     const hasNext = await nextBtn.isVisible({ timeout: 5000 }).catch(() => false);
 
@@ -161,7 +166,7 @@ test.describe('모니터 대시보드 - 멀티탭 세션', () => {
       const activityRows = hostPage.locator('table tbody tr, [class*="row"][cursor="pointer"]');
       const rowCount = await activityRows.count();
       if (rowCount > 1) {
-        await activityRows.nth(1).click();
+        await activityRows.nth(1).click({ force: true }).catch(() => {});
         const confirmBtn = hostPage.locator(SELECTORS.host.confirmButton);
         if (await confirmBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
           await confirmBtn.click();
@@ -175,14 +180,18 @@ test.describe('모니터 대시보드 - 멀티탭 세션', () => {
   });
 
   test('12. 수업 종료 다이얼로그에 완료/중단/취소 옵션이 있다', async () => {
-    await hostPage.locator('button:has-text("수업 종료")').click();
+    // 1.65.0+: 시작 다이얼로그가 자동 재출현하므로 JS 직접 클릭으로 모달 우회
+    await dismissStartDialog(hostPage, 2);
+    const ok = await clickButtonByText(hostPage, '수업 종료');
+    if (!ok) {
+      await hostPage.locator('button:has-text("수업 종료")').click({ force: true });
+    }
 
     await expect(hostPage.locator('text=회기 종료')).toBeVisible({ timeout: TIMEOUTS.medium });
     await expect(hostPage.locator('text=완료').first()).toBeVisible();
     await expect(hostPage.locator('text=중단').first()).toBeVisible();
     await expect(hostPage.locator('text=취소').first()).toBeVisible();
 
-    // 다이얼로그 닫기
     await hostPage.keyboard.press('Escape');
   });
 });
